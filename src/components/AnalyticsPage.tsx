@@ -632,6 +632,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
               </div>
             </div>
           )}
+        </div>
       </main>
     </div>
   );
