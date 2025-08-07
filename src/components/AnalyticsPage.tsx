@@ -1,9 +1,12 @@
 import React from 'react';
 import { 
   BarChart3, Users, Clock, MousePointer, TrendingUp, 
-  ArrowLeft, ChevronDown
+  ArrowLeft, Eye, Calendar, Activity, User, Award, Target,
+  Brain, AlertTriangle, CheckCircle, Info, ArrowUp, ArrowDown,
+  Filter, Search, Table
 } from 'lucide-react';
 import { getAnalyticsData } from '../data/analyticsData';
+import { DashboardAnalytics, UserAnalytics, AIRecommendation } from '../types/analytics';
 import { KPIChart } from './KPIChart';
 
 interface AnalyticsPageProps {
@@ -17,6 +20,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const [sortBy, setSortBy] = React.useState<'engagement' | 'pageViews' | 'timeOnPage' | 'users'>('engagement');
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedView, setSelectedView] = React.useState('ai-insights');
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -238,6 +242,67 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 <span>{user.totalPageViews} views</span>
                 <span className={`px-2 py-1 rounded-full ${getEngagementBadge(user.engagementScore)}`}>
                   {user.engagementScore.toFixed(0)}%
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen nature-bg">
+      <header className="nature-card bg-white/95 p-6 organic-shape mb-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={onBack}
+              className="mr-4 p-2 rounded-xl hover:bg-green-100 smooth-transition"
+            >
+              <ArrowLeft className="h-6 w-6 text-green-600" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold nature-heading">Analytics Dashboard</h1>
+              <p className="nature-subtext">Comprehensive insights into dashboard performance and user engagement</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            icon={<Users className="h-6 w-6 text-green-600" />}
+            title="Total Users"
+            value={analyticsData.totalUsers}
+            subtitle="Active dashboard users"
+            color="green"
+          />
+          <MetricCard
+            icon={<Eye className="h-6 w-6 text-blue-600" />}
+            title="Page Views"
+            value={analyticsData.totalPageViews.toLocaleString()}
+            subtitle="Across all dashboards"
+            color="blue"
+          />
+          <MetricCard
+            icon={<Clock className="h-6 w-6 text-purple-600" />}
+            title="Avg. Session"
+            value={formatTime(Math.round(analyticsData.averageSessionDuration))}
+            subtitle="Time spent per session"
+            color="purple"
+          />
+          <MetricCard
+            icon={<TrendingUp className="h-6 w-6 text-orange-600" />}
+            title="Engagement"
+            value={`${analyticsData.overallEngagement.toFixed(1)}%`}
+            subtitle="Overall user engagement"
+            color="orange"
+          />
+        </div>
+
+        <div className="space-y-6">
           {/* KPI Chart - Always Visible */}
           <KPIChart analyticsData={analyticsData} selectedRole={selectedRole} />
 
