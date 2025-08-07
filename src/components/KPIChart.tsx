@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   BarChart3, TrendingUp, Users, Clock, MousePointer, 
-  Brain, Target, Award, AlertTriangle, CheckCircle,
+  Brain, Target, Award, AlertTriangle, CheckCircle, ChevronDown,
   ArrowUp, ArrowDown, Minus, Eye, Activity, Calendar
 } from 'lucide-react';
 import { AnalyticsData, DashboardAnalytics } from '../types/analytics';
@@ -35,6 +35,9 @@ interface AIPrompt {
 }
 
 export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
+  const [selectedAIRole, setSelectedAIRole] = React.useState('Teacher');
+  const [showAIDropdown, setShowAIDropdown] = React.useState(false);
+
   // Calculate KPI metrics with simulated changes
   const kpiMetrics: KPIMetric[] = [
     {
@@ -168,10 +171,15 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
 
   const aiPrompts = generateAIPrompts();
 
-  // Filter AI prompts based on selected role
-  const filteredPrompts = selectedRole === 'all' 
-    ? aiPrompts.slice(0, 4) // Show one for each role when 'all' is selected
-    : aiPrompts.filter(prompt => prompt.role.toLowerCase().replace(' ', '') === selectedRole.toLowerCase()).slice(0, 1);
+  // Get the selected AI prompt
+  const selectedAIPrompt = aiPrompts.find(prompt => prompt.role === selectedAIRole) || aiPrompts[0];
+
+  const aiRoleOptions = [
+    { id: 'Teacher', name: 'Teacher', icon: '👩‍🏫' },
+    { id: 'CEO', name: 'CEO', icon: '👔' },
+    { id: 'IT Specialist', name: 'IT Specialist', icon: '💻' },
+    { id: 'Team Leader', name: 'Team Leader', icon: '👨‍💼' }
+  ];
 
   const getChangeIcon = (change: number) => {
     if (change > 0) return <ArrowUp className="h-4 w-4 text-green-600" />;
@@ -290,80 +298,106 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold nature-heading flex items-center">
             <Brain className="h-8 w-8 mr-4 text-purple-600" />
-            AI Dashboard Organization {selectedRole !== 'all' && `- ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}`}
+            AI Dashboard Organization
           </h2>
-          <div className="text-sm nature-subtext">
-            {selectedRole === 'all' 
-              ? 'Intelligent layout recommendations for all roles' 
-              : `Personalized recommendations for ${selectedRole} role`
-            }
+          <div className="relative">
+            <button
+              onClick={() => setShowAIDropdown(!showAIDropdown)}
+              className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 smooth-transition"
+            >
+              <span>{aiRoleOptions.find(role => role.id === selectedAIRole)?.icon}</span>
+              <span className="font-medium">{selectedAIRole}</span>
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            
+            {showAIDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-purple-100 z-10">
+                {aiRoleOptions.map((role) => (
+                  <button
+                    key={role.id}
+                    onClick={() => {
+                      setSelectedAIRole(role.id);
+                      setShowAIDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 hover:bg-purple-50 flex items-center space-x-2 first:rounded-t-xl last:rounded-b-xl ${
+                      selectedAIRole === role.id ? 'bg-purple-100' : ''
+                    }`}
+                  >
+                    <span>{role.icon}</span>
+                    <span>{role.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="space-y-6">
-          {filteredPrompts.map((aiPrompt, index) => (
-            <div key={aiPrompt.role} className="p-6 bg-gradient-to-r from-purple-50/50 to-blue-50/50 rounded-2xl border border-purple-100">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                    aiPrompt.role === 'Teacher' ? 'bg-green-500' :
-                    aiPrompt.role === 'CEO' ? 'bg-blue-500' :
-                    aiPrompt.role === 'IT Specialist' ? 'bg-purple-500' :
-                    'bg-orange-500'
-                  }`}>
-                    {aiPrompt.role.charAt(0)}
+        <div className="p-6 bg-gradient-to-r from-purple-50/50 to-blue-50/50 rounded-2xl border border-purple-100">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                selectedAIPrompt.role === 'Teacher' ? 'bg-green-500' :
+                selectedAIPrompt.role === 'CEO' ? 'bg-blue-500' :
+                selectedAIPrompt.role === 'IT Specialist' ? 'bg-purple-500' :
+                'bg-orange-500'
+              }`}>
+                {selectedAIPrompt.role.charAt(0)}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold nature-heading">{selectedAIPrompt.role} Dashboard</h3>
+                <div className="flex items-center space-x-4 text-sm nature-subtext">
+                  <span>Engagement: {selectedAIPrompt.kpis.engagement.toFixed(1)}%</span>
+                  <span>Views: {selectedAIPrompt.kpis.pageViews}</span>
+                  <span>Time: {Math.round(selectedAIPrompt.kpis.timeOnPage)}s</span>
+                  <span>Clicks: {selectedAIPrompt.kpis.clickRate.toFixed(1)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Brain className="h-5 w-5 text-purple-600" />
+              <span className="text-sm font-medium text-purple-700">AI Generated</span>
+            </div>
+          </div>
+          {/* AI Prompt */}
+          <div className="mb-6 p-4 bg-white/70 rounded-xl border-l-4 border-purple-400">
+            <h4 className="font-semibold text-purple-800 mb-2 flex items-center">
+              <Target className="h-4 w-4 mr-2" />
+              AI Recommendation
+            </h4>
+            <p className="text-purple-700 leading-relaxed">{selectedAIPrompt.prompt}</p>
+          </div>
+
+          {/* Recommended Dashboard Order */}
+          <div className="mb-4">
+            <h4 className="font-semibold nature-heading mb-3 flex items-center">
+              <Award className="h-4 w-4 mr-2 text-green-600" />
+              Recommended Dashboard Organization
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {selectedAIPrompt.recommendedOrder.map((item, itemIndex) => (
+                <div key={item} className="flex items-center space-x-3 p-3 bg-white/80 rounded-lg border border-green-100">
+                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    {itemIndex + 1}
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold nature-heading">{aiPrompt.role} Dashboard</h3>
-                    <div className="flex items-center space-x-4 text-sm nature-subtext">
-                      <span>Engagement: {aiPrompt.kpis.engagement.toFixed(1)}%</span>
-                      <span>Views: {aiPrompt.kpis.pageViews}</span>
-                      <span>Time: {Math.round(aiPrompt.kpis.timeOnPage)}s</span>
-                      <span>Clicks: {aiPrompt.kpis.clickRate.toFixed(1)}</span>
-                    </div>
-                  </div>
+                  <span className="text-sm font-medium nature-heading">{item}</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-700">AI Generated</span>
-                </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              {/* AI Prompt */}
-              <div className="mb-6 p-4 bg-white/70 rounded-xl border-l-4 border-purple-400">
-                <h4 className="font-semibold text-purple-800 mb-2 flex items-center">
-                  <Target className="h-4 w-4 mr-2" />
-                  AI Recommendation
-                </h4>
-                <p className="text-purple-700 leading-relaxed">{aiPrompt.prompt}</p>
-              </div>
-
-              {/* Recommended Dashboard Order */}
-              <div className="mb-4">
-                <h4 className="font-semibold nature-heading mb-3 flex items-center">
-                  <Award className="h-4 w-4 mr-2 text-green-600" />
-                  Recommended Dashboard Organization
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {aiPrompt.recommendedOrder.map((item, itemIndex) => (
-                    <div key={item} className="flex items-center space-x-3 p-3 bg-white/80 rounded-lg border border-green-100">
-                      <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {itemIndex + 1}
-                      </div>
-                      <span className="text-sm font-medium nature-heading">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI Reasoning */}
-              <div className="p-4 bg-blue-50/50 rounded-xl border-l-4 border-blue-400">
-                <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  AI Reasoning
-                </h4>
-                <p className="text-blue-700 text-sm">{aiPrompt.reasoning}</p>
-              </div>
+          {/* AI Reasoning */}
+          <div className="p-4 bg-blue-50/50 rounded-xl border-l-4 border-blue-400">
+            <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              AI Reasoning
+            </h4>
+            <p className="text-blue-700 text-sm">{selectedAIPrompt.reasoning}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
             </div>
           ))}
         </div>
