@@ -1,12 +1,9 @@
 import React from 'react';
 import { 
   BarChart3, Users, Clock, MousePointer, TrendingUp, 
-  ArrowLeft, Eye, Calendar, Activity, User, Award, Target,
-  Brain, AlertTriangle, CheckCircle, Info, ArrowUp, ArrowDown,
-  Filter, Search, Table
+  ArrowLeft, ChevronDown
 } from 'lucide-react';
 import { getAnalyticsData } from '../data/analyticsData';
-import { DashboardAnalytics, UserAnalytics, AIRecommendation } from '../types/analytics';
 import { KPIChart } from './KPIChart';
 
 interface AnalyticsPageProps {
@@ -15,7 +12,8 @@ interface AnalyticsPageProps {
 
 export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const analyticsData = getAnalyticsData();
-  const [selectedView, setSelectedView] = React.useState<'overview' | 'users' | 'dashboards' | 'ai-insights' | 'kpi-chart'>('overview');
+  const [selectedRole, setSelectedRole] = React.useState<string>('all');
+  const [showRoleDropdown, setShowRoleDropdown] = React.useState(false);
   const [sortBy, setSortBy] = React.useState<'engagement' | 'pageViews' | 'timeOnPage' | 'users'>('engagement');
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -56,6 +54,16 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
       default: return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
+
+  const roles = [
+    { id: 'all', name: 'All Roles', icon: '👥' },
+    { id: 'teacher', name: 'Teacher', icon: '👩‍🏫' },
+    { id: 'ceo', name: 'CEO', icon: '👔' },
+    { id: 'itSpecialist', name: 'IT Specialist', icon: '💻' },
+    { id: 'teamLeader', name: 'Team Leader', icon: '👨‍💼' }
+  ];
+
+  const selectedRoleData = roles.find(role => role.id === selectedRole) || roles[0];
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
@@ -230,325 +238,8 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 <span>{user.totalPageViews} views</span>
                 <span className={`px-2 py-1 rounded-full ${getEngagementBadge(user.engagementScore)}`}>
                   {user.engagementScore.toFixed(0)}%
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-green-100 pt-4">
-        <h4 className="text-sm font-semibold nature-heading mb-3">Recent Activity</h4>
-        <div className="space-y-2">
-          {dashboard.recentViews.slice(0, 3).map((view) => (
-            <div key={view.id} className="flex items-center justify-between text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="nature-subtext">{view.userName}</span>
-              </div>
-              <div className="flex items-center space-x-4 text-xs nature-subtext">
-                <span>{formatTime(view.timeOnPage)}</span>
-                <span>{view.clicks} clicks</span>
-                <span>{formatDate(view.timestamp)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #fefffe 0%, #f8f9fa 100%)' }}>
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-green-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button
-                onClick={onBack}
-                className="mr-6 p-3 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-full smooth-transition"
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </button>
-              <div className="flex items-center">
-                <div className="w-12 h-12 nature-gradient rounded-full flex items-center justify-center mr-6">
-                  <BarChart3 className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold nature-heading">Analytics Dashboard</h1>
-                  <p className="text-sm nature-subtext font-medium">Career Platform Usage Insights</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex bg-white rounded-full p-1 border border-green-200">
-                <button
-                  onClick={() => setSelectedView('overview')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
-                    selectedView === 'overview' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-green-600 hover:bg-green-50'
-                  }`}
-                >
-                  Overview
-                </button>
-                <button
-                  onClick={() => setSelectedView('kpi-chart')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
-                    selectedView === 'kpi-chart' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-green-600 hover:bg-green-50'
-                  }`}
-                >
-                  KPI Chart
-                </button>
-                <button
-                  onClick={() => setSelectedView('users')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
-                    selectedView === 'users' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-green-600 hover:bg-green-50'
-                  }`}
-                >
-                  Users
-                </button>
-                <button
-                  onClick={() => setSelectedView('dashboards')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
-                    selectedView === 'dashboards' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-green-600 hover:bg-green-50'
-                  }`}
-                >
-                  Dashboards
-                </button>
-                <button
-                  onClick={() => setSelectedView('ai-insights')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
-                    selectedView === 'ai-insights' 
-                      ? 'bg-green-500 text-white' 
-                      : 'text-green-600 hover:bg-green-50'
-                  }`}
-                >
-                  AI Insights
-                </button>
-              </div>
-              <div className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                Last 30 Days
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-8">
-        <div className="space-y-8">
-          {selectedView === 'overview' && (
-            <>
-              {/* Overview Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <MetricCard
-                  icon={<Eye className="h-6 w-6 text-green-600" />}
-                  title="Total Page Views"
-                  value={analyticsData.totalPageViews}
-                  subtitle="Across all dashboards"
-                  color="green"
-                />
-                <MetricCard
-                  icon={<Users className="h-6 w-6 text-blue-600" />}
-                  title="Unique Users"
-                  value={analyticsData.totalUniqueUsers}
-                  subtitle="Active users this period"
-                  color="blue"
-                />
-                <MetricCard
-                  icon={<TrendingUp className="h-6 w-6 text-purple-600" />}
-                  title="Avg. Engagement"
-                  value={`${analyticsData.averageEngagement.toFixed(1)}%`}
-                  subtitle="Overall platform engagement"
-                  color="purple"
-                />
-              </div>
-
-              {/* Top Performers */}
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold nature-heading flex items-center">
-                    <Award className="h-6 w-6 mr-3 text-green-600" />
-                    Top Performers
-                  </h2>
-                  <div className="text-sm nature-subtext">Highest engagement users</div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {analyticsData.topPerformers.slice(0, 6).map((user) => (
-                    <UserAnalyticsCard key={user.userId} user={user} />
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {selectedView === 'kpi-chart' && (
-            <KPIChart analyticsData={analyticsData} />
-          )}
-
-          {selectedView === 'users' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold nature-heading flex items-center">
-                  <Table className="h-6 w-6 mr-3 text-green-600" />
-                  User Analytics Table
-                </h2>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
-                    <input
-                      type="text"
-                      placeholder="Search users..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
-                    />
-                  </div>
-                  <div className="text-sm nature-subtext">
-                    {sortedUsers.length} users • Sorted by {sortBy} ({sortOrder})
-                  </div>
-                </div>
-              </div>
-              
-              {/* User Analytics Table */}
-              <div className="nature-card bg-white/95 overflow-hidden organic-shape">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-green-50/50 border-b border-green-100">
-                      <tr>
-                        <th className="text-left p-4 font-semibold nature-heading">User</th>
-                        <th 
-                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
-                          onClick={() => handleSort('engagement')}
-                        >
-                          <div className="flex items-center space-x-1">
-                            <span>Engagement</span>
-                            {sortBy === 'engagement' && (
-                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
-                            )}
-                          </div>
-                        </th>
-                        <th 
-                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
-                          onClick={() => handleSort('pageViews')}
-                        >
-                          <div className="flex items-center space-x-1">
-                            <span>Page Views</span>
-                            {sortBy === 'pageViews' && (
-                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
-                            )}
-                          </div>
-                        </th>
-                        <th 
-                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
-                          onClick={() => handleSort('timeOnPage')}
-                        >
-                          <div className="flex items-center space-x-1">
-                            <span>Avg. Time</span>
-                            {sortBy === 'timeOnPage' && (
-                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
-                            )}
-                          </div>
-                        </th>
-                        <th className="text-left p-4 font-semibold nature-heading">Clicks</th>
-                        <th 
-                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
-                          onClick={() => handleSort('users')}
-                        >
-                          <div className="flex items-center space-x-1">
-                            <span>Dashboards</span>
-                            {sortBy === 'users' && (
-                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
-                            )}
-                          </div>
-                        </th>
-                        <th className="text-left p-4 font-semibold nature-heading">Most Used</th>
-                        <th className="text-left p-4 font-semibold nature-heading">Last Activity</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sortedUsers.map((user, index) => (
-                        <tr 
-                          key={user.userId} 
-                          className={`border-b border-green-50 hover:bg-green-50/30 transition-colors ${
-                            index % 2 === 0 ? 'bg-white' : 'bg-green-25/20'
-                          }`}
-                        >
-                          <td className="p-4">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">{user.userName.charAt(0)}</span>
-                              </div>
-                              <div>
-                                <div className="font-semibold nature-heading">{user.userName}</div>
-                                <div className="text-sm nature-subtext">User #{index + 1}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center space-x-2">
-                              <div className={`px-3 py-1 rounded-full text-sm font-medium ${getEngagementBadge(user.engagementScore)}`}>
-                                {user.engagementScore.toFixed(1)}%
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-semibold nature-heading">{user.totalPageViews}</div>
-                            <div className="text-sm nature-subtext">visits</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-semibold nature-heading">{formatTime(Math.round(user.averageTimeOnPage))}</div>
-                            <div className="text-sm nature-subtext">per session</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-semibold nature-heading">{user.averageClicksPerSession.toFixed(1)}</div>
-                            <div className="text-sm nature-subtext">per session</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-semibold nature-heading">{user.dashboardsVisited.length}</div>
-                            <div className="text-sm nature-subtext">explored</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-medium nature-heading text-sm">{user.mostVisitedDashboard}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm nature-subtext">{formatDate(user.lastActivity)}</div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {selectedView === 'dashboards' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold nature-heading flex items-center">
-                  <Target className="h-6 w-6 mr-3 text-green-600" />
-                  Dashboard Performance
-                </h2>
-                <div className="text-sm nature-subtext">Sorted by engagement score</div>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {analyticsData.dashboards.map((dashboard) => (
-                  <DashboardAnalyticsCard key={dashboard.dashboardId} dashboard={dashboard} />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* KPI Chart - Always Visible */}
+          <KPIChart analyticsData={analyticsData} selectedRole={selectedRole} />
 
           {selectedView === 'ai-insights' && (
             <div className="space-y-6">
