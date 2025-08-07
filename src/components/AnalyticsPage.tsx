@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { getAnalyticsData } from '../data/analyticsData';
 import { DashboardAnalytics, UserAnalytics, AIRecommendation } from '../types/analytics';
+import { KPIChart } from './KPIChart';
 
 interface AnalyticsPageProps {
   onBack: () => void;
@@ -14,7 +15,7 @@ interface AnalyticsPageProps {
 
 export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const analyticsData = getAnalyticsData();
-  const [selectedView, setSelectedView] = React.useState<'overview' | 'users' | 'dashboards' | 'ai-insights'>('overview');
+  const [selectedView, setSelectedView] = React.useState<'overview' | 'users' | 'dashboards' | 'ai-insights' | 'kpi-chart'>('overview');
   const [sortBy, setSortBy] = React.useState<'engagement' | 'pageViews' | 'timeOnPage' | 'users'>('engagement');
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -293,6 +294,16 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                   Overview
                 </button>
                 <button
+                  onClick={() => setSelectedView('kpi-chart')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
+                    selectedView === 'kpi-chart' 
+                      ? 'bg-green-500 text-white' 
+                      : 'text-green-600 hover:bg-green-50'
+                  }`}
+                >
+                  KPI Chart
+                </button>
+                <button
                   onClick={() => setSelectedView('users')}
                   className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
                     selectedView === 'users' 
@@ -378,6 +389,10 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 </div>
               </div>
             </>
+          )}
+
+          {selectedView === 'kpi-chart' && (
+            <KPIChart analyticsData={analyticsData} />
           )}
 
           {selectedView === 'users' && (
