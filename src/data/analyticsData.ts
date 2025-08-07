@@ -1,4 +1,4 @@
-import { AnalyticsData, PageView, DashboardAnalytics } from '../types/analytics';
+import { AnalyticsData, PageView, DashboardAnalytics, UserAnalytics } from '../types/analytics';
 
 // Generate mock analytics data
 function generateMockPageViews(): PageView[] {
@@ -9,11 +9,20 @@ function generateMockPageViews(): PageView[] {
     { id: 'teamLeader', name: 'Team Leader Dashboard' }
   ];
 
-  const users = ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8'];
+  const users = [
+    { id: 'user1', name: 'Sarah Mitchell' },
+    { id: 'user2', name: 'David Chen' },
+    { id: 'user3', name: 'Emma Rodriguez' },
+    { id: 'user4', name: 'Michael Johnson' },
+    { id: 'user5', name: 'Lisa Thompson' },
+    { id: 'user6', name: 'James Wilson' },
+    { id: 'user7', name: 'Maria Garcia' },
+    { id: 'user8', name: 'Robert Davis' }
+  ];
   const views: PageView[] = [];
 
-  // Generate 100 mock page views over the last 30 days
-  for (let i = 0; i < 100; i++) {
+  // Generate 150 mock page views over the last 30 days
+  for (let i = 0; i < 150; i++) {
     const dashboard = dashboards[Math.floor(Math.random() * dashboards.length)];
     const user = users[Math.floor(Math.random() * users.length)];
     const daysAgo = Math.floor(Math.random() * 30);
@@ -24,7 +33,8 @@ function generateMockPageViews(): PageView[] {
 
     views.push({
       id: `view_${i}`,
-      userId: user,
+      userId: user.id,
+      userName: user.name,
       dashboardId: dashboard.id,
       dashboardName: dashboard.name,
       timestamp,
@@ -34,6 +44,61 @@ function generateMockPageViews(): PageView[] {
   }
 
   return views.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+}
+
+function calculateUserAnalytics(views: PageView[]): UserAnalytics[] {
+  const userMap = new Map<string, PageView[]>();
+  
+  // Group views by user
+  views.forEach(view => {
+    if (!userMap.has(view.userId)) {
+      userMap.set(view.userId, []);
+    }
+    userMap.get(view.userId)!.push(view);
+  });
+
+  const userAnalytics: UserAnalytics[] = [];
+
+  userMap.forEach((userViews, userId) => {
+    const totalPageViews = userViews.length;
+    const totalTimeOnPage = userViews.reduce((sum, v) => sum + v.timeOnPage, 0);
+    const averageTimeOnPage = totalTimeOnPage / totalPageViews;
+    const totalClicks = userViews.reduce((sum, v) => sum + v.clicks, 0);
+    const averageClicksPerSession = totalClicks / totalPageViews;
+    
+    // Get unique dashboards visited
+    const dashboardsVisited = [...new Set(userViews.map(v => v.dashboardName))];
+    
+    // Find most visited dashboard
+    const dashboardCounts = new Map<string, number>();
+    userViews.forEach(view => {
+      dashboardCounts.set(view.dashboardName, (dashboardCounts.get(view.dashboardName) || 0) + 1);
+    });
+    const mostVisitedDashboard = [...dashboardCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    
+    // Calculate engagement score: PV×0.2 + TTP×0.5 + CTR×0.3
+    const normalizedPV = Math.min(totalPageViews / 20, 1); // Normalize to 0-1 scale
+    const normalizedTTP = Math.min(averageTimeOnPage / 300, 1); // Normalize to 0-1 scale (5 min max)
+    const normalizedCTR = Math.min(averageClicksPerSession / 10, 1); // Normalize to 0-1 scale
+    const engagementScore = (normalizedPV * 0.2 + normalizedTTP * 0.5 + normalizedCTR * 0.3) * 100;
+
+    userAnalytics.push({
+      userId,
+      userName: userViews[0].userName,
+      totalPageViews,
+      totalTimeOnPage,
+      averageTimeOnPage,
+      totalClicks,
+      averageClicksPerSession,
+      engagementScore,
+      dashboardsVisited,
+      mostVisitedDashboard,
+      lastActivity: userViews[0].timestamp, // Most recent activity (views are sorted)
+      sessions: userViews.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    });
+  });
+
+  return userAnalytics.sort((a, b) => b.engagementScore - a.engagementScore);
 }
 
 function calculateDashboardAnalytics(views: PageView[]): DashboardAnalytics[] {
@@ -48,6 +113,7 @@ function calculateDashboardAnalytics(views: PageView[]): DashboardAnalytics[] {
   });
 
   const analytics: DashboardAnalytics[] = [];
+  const allUsers = calculateUserAnalytics(views);
 
   dashboardMap.forEach((dashboardViews, dashboardId) => {
     const pageViews = dashboardViews.length;
@@ -63,6 +129,11 @@ function calculateDashboardAnalytics(views: PageView[]): DashboardAnalytics[] {
     const normalizedCTR = Math.min(clickThroughRate / 10, 1); // Normalize to 0-1 scale
     const engagementScore = (normalizedPV * 0.2 + normalizedTTP * 0.5 + normalizedCTR * 0.3) * 100;
 
+    // Get top users for this dashboard
+    const dashboardUsers = allUsers.filter(user => 
+      user.sessions.some(session => session.dashboardId === dashboardId)
+    ).slice(0, 5);
+
     analytics.push({
       dashboardId,
       dashboardName: dashboardViews[0].dashboardName,
@@ -72,7 +143,8 @@ function calculateDashboardAnalytics(views: PageView[]): DashboardAnalytics[] {
       totalClicks,
       clickThroughRate,
       engagementScore,
-      recentViews: dashboardViews.slice(0, 5)
+      recentViews: dashboardViews.slice(0, 5),
+      topUsers: dashboardUsers
     });
   });
 
@@ -82,12 +154,15 @@ function calculateDashboardAnalytics(views: PageView[]): DashboardAnalytics[] {
 export function getAnalyticsData(): AnalyticsData {
   const pageViews = generateMockPageViews();
   const dashboards = calculateDashboardAnalytics(pageViews);
+  const users = calculateUserAnalytics(pageViews);
   
   return {
     totalPageViews: pageViews.length,
     totalUniqueUsers: new Set(pageViews.map(v => v.userId)).size,
     averageEngagement: dashboards.reduce((sum, d) => sum + d.engagementScore, 0) / dashboards.length,
     dashboards,
-    recentActivity: pageViews.slice(0, 20)
+    recentActivity: pageViews.slice(0, 20),
+    users,
+    topPerformers: users.slice(0, 10)
   };
 }
