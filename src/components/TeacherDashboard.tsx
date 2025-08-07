@@ -1,10 +1,11 @@
 import React from 'react';
 import { 
   Bell, Settings, LogOut, Search, ChevronDown,
-  Save, X, Briefcase
+  Save, X, Briefcase, BarChart3
 } from 'lucide-react';
 import { useDashboard } from '../hooks/useDashboard';
 import { DashboardHeader } from './DashboardHeader';
+import { AnalyticsPage } from './AnalyticsPage';
 import { EditForm } from '../types/dashboard';
 
 interface TeacherDashboardProps {
@@ -12,6 +13,7 @@ interface TeacherDashboardProps {
 }
 
 export function TeacherDashboard({ onLogout }: TeacherDashboardProps) {
+  const [showAnalytics, setShowAnalytics] = React.useState(false);
   const {
     mode,
     searchQuery,
@@ -36,6 +38,10 @@ export function TeacherDashboard({ onLogout }: TeacherDashboardProps) {
     handleItemClick,
     setShowAddForm
   } = useDashboard();
+
+  if (showAnalytics) {
+    return <AnalyticsPage onBack={() => setShowAnalytics(false)} />;
+  }
 
   const handleFormChange = (
     form: EditForm,
@@ -66,6 +72,13 @@ export function TeacherDashboard({ onLogout }: TeacherDashboardProps) {
               </div>
             </div>
             <div className="flex items-center space-x-6">
+              <button 
+                onClick={() => setShowAnalytics(true)}
+                className="flex items-center px-6 py-3 text-green-700 hover:bg-green-50 organic-button bg-white border border-green-200 smooth-transition"
+              >
+                <BarChart3 className="h-5 w-5 mr-2" />
+                Analytics
+              </button>
               <button className="p-3 text-green-600 hover:text-green-800 smooth-transition rounded-full hover:bg-green-50">
                 <Bell className="h-6 w-6" />
               </button>
