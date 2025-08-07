@@ -328,7 +328,6 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
               </div>
             </div>
           </div>
-          )}
         </div>
       </header>
 
@@ -600,43 +599,39 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Recent Activity Feed */}
-          {selectedView === 'overview' && (
-            <div className="nature-card bg-white/95 p-8 organic-shape">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold nature-heading flex items-center">
-                <Activity className="h-6 w-6 mr-3 text-green-600" />
-                Recent Activity Feed
-              </h2>
-              <div className="text-sm nature-subtext">Last 20 interactions</div>
-            </div>
-            
-            <div className="space-y-3">
-              {analyticsData.recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-4 bg-green-50/30 rounded-xl hover:bg-green-50/50 smooth-transition">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <div>
-                      <div className="font-medium nature-heading">
-                        {activity.userName} visited {activity.dashboardName}
+              <div className="nature-card bg-white/95 p-8 organic-shape">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold nature-heading flex items-center">
+                    <Activity className="h-6 w-6 mr-3 text-green-600" />
+                    Recent Activity Feed
+                  </h2>
+                  <div className="text-sm nature-subtext">Last 20 interactions</div>
+                </div>
+                
+                <div className="space-y-3">
+                  {analyticsData.recentActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-center justify-between p-4 bg-green-50/30 rounded-xl hover:bg-green-50/50 smooth-transition">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <div>
+                          <div className="font-medium nature-heading">
+                            {activity.userName} visited {activity.dashboardName}
+                          </div>
+                          <div className="text-sm nature-subtext">
+                            Spent {formatTime(activity.timeOnPage)} • {activity.clicks} clicks
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm nature-subtext">
-                        Spent {formatTime(activity.timeOnPage)} • {activity.clicks} clicks
+                      <div className="text-sm nature-subtext flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        {formatDate(activity.timestamp)}
                       </div>
                     </div>
-                  </div>
-                  <div className="text-sm nature-subtext flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    {formatDate(activity.timestamp)}
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </div>
+          )}
       </main>
     </div>
   );
