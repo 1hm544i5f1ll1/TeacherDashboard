@@ -1,16 +1,34 @@
 import React from 'react';
 import { 
   BarChart3, Users, Clock, MousePointer, TrendingUp, 
-  ArrowLeft, Eye, Calendar, Activity, User, Award, Target,
-  Brain, AlertTriangle, CheckCircle, Info, ArrowUp, ArrowDown,
-  Filter, Search, Table
+  ArrowLeft, ChevronDown, AlertTriangle, Info, CheckCircle, User, Brain, Activity, Calendar
 } from 'lucide-react';
 import { getAnalyticsData } from '../data/analyticsData';
-import { DashboardAnalytics, UserAnalytics, AIRecommendation } from '../types/analytics';
 import { KPIChart } from './KPIChart';
 
 interface AnalyticsPageProps {
   onBack: () => void;
+}
+
+interface UserAnalytics {
+  userName: string;
+  mostVisitedDashboard: string;
+  engagementScore: number;
+  totalPageViews: number;
+  averageTimeOnPage: number;
+  averageClicksPerSession: number;
+  dashboardsVisited: string[];
+  lastActivity: Date;
+}
+
+interface DashboardAnalytics {
+  dashboardName: string;
+  engagementScore: number;
+  pageViews: number;
+  uniqueUsers: number;
+  averageTimeOnPage: number;
+  clickThroughRate: number;
+  topUsers: UserAnalytics[];
 }
 
 export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
@@ -20,7 +38,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const [sortBy, setSortBy] = React.useState<'engagement' | 'pageViews' | 'timeOnPage' | 'users'>('engagement');
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedView, setSelectedView] = React.useState('ai-insights');
+  const [selectedView, setSelectedView] = React.useState<'overview' | 'users' | 'dashboards' | 'ai-insights'>('overview');
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -263,46 +281,71 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
               <ArrowLeft className="h-6 w-6 text-green-600" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold nature-heading">Analytics Dashboard</h1>
-              <p className="nature-subtext">Comprehensive insights into dashboard performance and user engagement</p>
+              <h1 className="text-3xl font-bold nature-heading flex items-center">
+                <BarChart3 className="h-8 w-8 mr-3 text-green-600" />
+                Dashboard Analytics
+              </h1>
+              <p className="nature-subtext mt-1">Comprehensive insights into dashboard usage and performance</p>
             </div>
           </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <button
+                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 smooth-transition"
+              >
+                <span>{selectedRoleData.icon}</span>
+                <span className="font-medium">{selectedRoleData.name}</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+              
+              {showRoleDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-green-100 z-10">
+                  {roles.map((role) => (
+                    <button
+                      key={role.id}
+                      onClick={() => {
+                        setSelectedRole(role.id);
+                        setShowRoleDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-green-50 flex items-center space-x-2 first:rounded-t-xl last:rounded-b-xl"
+                    >
+                      <span>{role.icon}</span>
+                      <span>{role.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-4 mt-6">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'users', label: 'User Analytics', icon: Users },
+            { id: 'dashboards', label: 'Dashboard Performance', icon: TrendingUp },
+            { id: 'ai-insights', label: 'AI Insights', icon: Brain }
+          ].map((view) => (
+            <button
+              key={view.id}
+              onClick={() => setSelectedView(view.id as any)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl smooth-transition ${
+                selectedView === view.id
+                  ? 'bg-green-600 text-white'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              <view.icon className="h-4 w-4" />
+              <span className="font-medium">{view.label}</span>
+            </button>
+          ))}
         </div>
       </header>
 
       <main className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard
-            icon={<Users className="h-6 w-6 text-green-600" />}
-            title="Total Users"
-            value={analyticsData.totalUsers}
-            subtitle="Active dashboard users"
-            color="green"
-          />
-          <MetricCard
-            icon={<Eye className="h-6 w-6 text-blue-600" />}
-            title="Page Views"
-            value={analyticsData.totalPageViews.toLocaleString()}
-            subtitle="Across all dashboards"
-            color="blue"
-          />
-          <MetricCard
-            icon={<Clock className="h-6 w-6 text-purple-600" />}
-            title="Avg. Session"
-            value={formatTime(Math.round(analyticsData.averageSessionDuration))}
-            subtitle="Time spent per session"
-            color="purple"
-          />
-          <MetricCard
-            icon={<TrendingUp className="h-6 w-6 text-orange-600" />}
-            title="Engagement"
-            value={`${analyticsData.overallEngagement.toFixed(1)}%`}
-            subtitle="Overall user engagement"
-            color="orange"
-          />
-        </div>
-
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* KPI Chart - Always Visible */}
           <KPIChart analyticsData={analyticsData} selectedRole={selectedRole} />
 
@@ -370,6 +413,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                   </div>
                 ))}
               </div>
+              
               <div className="nature-card bg-white/95 p-8 organic-shape">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold nature-heading flex items-center">
