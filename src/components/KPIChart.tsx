@@ -170,8 +170,9 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
 
   // Filter AI prompts based on selected role
   const filteredPrompts = selectedRole === 'all' 
-    ? aiPrompts 
-    : aiPrompts.filter(prompt => prompt.role.toLowerCase().replace(' ', '') === selectedRole.toLowerCase());
+    ? aiPrompts.slice(0, 4) // Show one for each role when 'all' is selected
+    : aiPrompts.filter(prompt => prompt.role.toLowerCase().replace(' ', '') === selectedRole.toLowerCase()).slice(0, 1);
+
   const getChangeIcon = (change: number) => {
     if (change > 0) return <ArrowUp className="h-4 w-4 text-green-600" />;
     if (change < 0) return <ArrowDown className="h-4 w-4 text-red-600" />;
@@ -367,48 +368,6 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
           ))}
         </div>
       </div>
-
-      {selectedRole === 'all' && (
-        <>
-          {/* Recent Activity Feed - Only show when viewing all roles */}
-          <div className="nature-card bg-white/95 p-8 organic-shape">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold nature-heading flex items-center">
-                <Activity className="h-8 w-8 mr-4 text-green-600" />
-                Recent Activity Feed
-              </h2>
-              <div className="text-sm nature-subtext">Last 20 interactions across all roles</div>
-            </div>
-            
-            <div className="space-y-3">
-              {analyticsData.recentActivity.slice(0, 10).map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-4 bg-green-50/30 rounded-xl hover:bg-green-50/50 smooth-transition">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <div>
-                      <div className="font-medium nature-heading">
-                        {activity.userName} visited {activity.dashboardName}
-                      </div>
-                      <div className="text-sm nature-subtext">
-                        Spent {Math.floor(activity.timeOnPage / 60)}m {activity.timeOnPage % 60}s • {activity.clicks} clicks
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm nature-subtext flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    {activity.timestamp.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }
