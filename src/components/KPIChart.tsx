@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   BarChart3, TrendingUp, Users, Clock, MousePointer, 
   Brain, Target, Award, AlertTriangle, CheckCircle,
-  ArrowUp, ArrowDown, Minus, Eye, Activity
+  ArrowUp, ArrowDown, Minus, Eye, Activity, Calendar
 } from 'lucide-react';
 import { AnalyticsData, DashboardAnalytics } from '../types/analytics';
 
