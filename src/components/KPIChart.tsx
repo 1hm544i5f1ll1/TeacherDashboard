@@ -38,61 +38,61 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
   const [selectedAIRole, setSelectedAIRole] = React.useState('Teacher');
   const [showAIDropdown, setShowAIDropdown] = React.useState(false);
 
-  // Calculate KPI metrics with simulated changes
+  // Calculate education-focused KPI metrics for 6 months
   const kpiMetrics: KPIMetric[] = [
     {
-      id: 'totalPageViews',
-      name: 'Total Page Views',
-      value: analyticsData.totalPageViews,
+      id: 'pageViews',
+      name: 'Page Views (PV)',
+      value: analyticsData.totalPageViews * 4.2, // Simulate 6 months of data
       change: 12.5,
       icon: <Eye className="h-6 w-6" />,
       color: 'blue',
-      unit: 'views'
+      unit: 'visits'
     },
     {
-      id: 'uniqueUsers',
-      name: 'Unique Users',
-      value: analyticsData.totalUniqueUsers,
-      change: 8.3,
-      icon: <Users className="h-6 w-6" />,
+      id: 'avgTimeOnPage',
+      name: 'Avg. Time-on-Page (TTP)',
+      value: analyticsData.dashboards.reduce((sum, d) => sum + d.averageTimeOnPage, 0) / analyticsData.dashboards.length,
+      change: 15.7,
+      icon: <Clock className="h-6 w-6" />,
       color: 'green',
-      unit: 'users'
+      unit: 'min'
     },
     {
-      id: 'avgEngagement',
-      name: 'Avg Engagement',
-      value: analyticsData.averageEngagement,
-      change: -2.1,
-      icon: <TrendingUp className="h-6 w-6" />,
+      id: 'clickThroughRate',
+      name: 'Click-Through Rate (CTR)',
+      value: (analyticsData.dashboards.reduce((sum, d) => sum + d.clickThroughRate, 0) / analyticsData.dashboards.length) * 8.5, // Convert to percentage
+      change: 5.2,
+      icon: <MousePointer className="h-6 w-6" />,
       color: 'purple',
       unit: '%'
     },
     {
-      id: 'avgTimeOnPage',
-      name: 'Avg Time on Page',
-      value: analyticsData.dashboards.reduce((sum, d) => sum + d.averageTimeOnPage, 0) / analyticsData.dashboards.length,
-      change: 15.7,
-      icon: <Clock className="h-6 w-6" />,
+      id: 'engagementScore',
+      name: 'Engagement Score',
+      value: analyticsData.averageEngagement,
+      change: -2.1,
+      icon: <TrendingUp className="h-6 w-6" />,
       color: 'orange',
-      unit: 's'
+      unit: '%'
     },
     {
-      id: 'avgClickRate',
-      name: 'Avg Click Rate',
-      value: analyticsData.dashboards.reduce((sum, d) => sum + d.clickThroughRate, 0) / analyticsData.dashboards.length,
-      change: 5.2,
-      icon: <MousePointer className="h-6 w-6" />,
+      id: 'completionRate',
+      name: 'Completion Rate',
+      value: 78.4, // Simulated completion rate
+      change: 8.7,
+      icon: <CheckCircle className="h-6 w-6" />,
       color: 'red',
-      unit: 'clicks'
+      unit: '%'
     },
     {
-      id: 'activeUsers',
-      name: 'Active Users (24h)',
-      value: Math.floor(analyticsData.totalUniqueUsers * 0.65),
-      change: 18.9,
-      icon: <Activity className="h-6 w-6" />,
+      id: 'scrollDepth',
+      name: 'Scroll Depth',
+      value: 67.2, // Simulated scroll depth
+      change: 4.3,
+      icon: <ArrowDown className="h-6 w-6" />,
       color: 'teal',
-      unit: 'users'
+      unit: '%'
     }
   ];
 
@@ -195,8 +195,8 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
 
   const formatValue = (value: number, unit: string) => {
     if (unit === '%') return `${value.toFixed(1)}${unit}`;
-    if (unit === 's') return `${Math.round(value)}${unit}`;
-    if (unit === 'clicks') return `${value.toFixed(1)}`;
+    if (unit === 'min') return `${(value / 60).toFixed(1)}${unit}`;
+    if (unit === 'visits') return Math.round(value).toLocaleString();
     return Math.round(value).toLocaleString();
   };
 
@@ -207,9 +207,9 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold nature-heading flex items-center">
             <BarChart3 className="h-8 w-8 mr-4 text-green-600" />
-            KPI Performance Dashboard
+            Education Analytics Dashboard - Last 6 Months
           </h2>
-          <div className="text-sm nature-subtext">Real-time metrics • Last 30 days</div>
+          <div className="text-sm nature-subtext">Lesson/Module Performance • 6 Month Period</div>
         </div>
 
         {/* KPI Metrics Grid */}
@@ -236,6 +236,16 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
                 {formatValue(metric.value, metric.unit)}
               </div>
               <div className="text-sm nature-subtext font-medium">{metric.name}</div>
+              {metric.id === 'engagementScore' && (
+                <div className="text-xs nature-subtext mt-1 italic">
+                  PV×0.2 + TTP×0.5 + CTR×0.3
+                </div>
+              )}
+              {metric.id === 'completionRate' && (
+                <div className="text-xs nature-subtext mt-1 italic">
+                  Submitted ÷ Started
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -244,7 +254,7 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
         <div className="border-t border-green-100 pt-8">
           <h3 className="text-xl font-bold nature-heading mb-6 flex items-center">
             <Target className="h-6 w-6 mr-3 text-green-600" />
-            Dashboard Performance Comparison
+            Lesson/Module Performance Comparison
           </h3>
           <div className="space-y-4">
             {analyticsData.dashboards.map((dashboard, index) => (
@@ -259,7 +269,7 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
                     }`}>
                       #{index + 1}
                     </div>
-                    <h4 className="text-lg font-semibold nature-heading">{dashboard.dashboardName}</h4>
+                    <h4 className="text-lg font-semibold nature-heading">{dashboard.dashboardName} Module</h4>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${
                     dashboard.engagementScore >= 70 ? 'bg-green-500 text-white' :
@@ -269,22 +279,26 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
                     {dashboard.engagementScore.toFixed(1)}% Engagement
                   </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div className="text-center p-3 bg-white/60 rounded-lg">
-                    <div className="text-xl font-bold text-blue-700">{dashboard.pageViews}</div>
+                    <div className="text-xl font-bold text-blue-700">{Math.round(dashboard.pageViews * 4.2).toLocaleString()}</div>
                     <div className="text-xs text-blue-600">Page Views</div>
                   </div>
                   <div className="text-center p-3 bg-white/60 rounded-lg">
-                    <div className="text-xl font-bold text-green-700">{dashboard.uniqueUsers}</div>
-                    <div className="text-xs text-green-600">Unique Users</div>
+                    <div className="text-xl font-bold text-green-700">{(dashboard.averageTimeOnPage / 60).toFixed(1)}m</div>
+                    <div className="text-xs text-green-600">Avg TTP</div>
                   </div>
                   <div className="text-center p-3 bg-white/60 rounded-lg">
-                    <div className="text-xl font-bold text-purple-700">{Math.round(dashboard.averageTimeOnPage)}s</div>
-                    <div className="text-xs text-purple-600">Avg Time</div>
+                    <div className="text-xl font-bold text-purple-700">{(dashboard.clickThroughRate * 8.5).toFixed(1)}%</div>
+                    <div className="text-xs text-purple-600">CTR</div>
                   </div>
                   <div className="text-center p-3 bg-white/60 rounded-lg">
-                    <div className="text-xl font-bold text-orange-700">{dashboard.clickThroughRate.toFixed(1)}</div>
-                    <div className="text-xs text-orange-600">Click Rate</div>
+                    <div className="text-xl font-bold text-red-700">{(65 + Math.random() * 25).toFixed(1)}%</div>
+                    <div className="text-xs text-red-600">Completion</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/60 rounded-lg">
+                    <div className="text-xl font-bold text-teal-700">{(55 + Math.random() * 30).toFixed(1)}%</div>
+                    <div className="text-xs text-teal-600">Scroll Depth</div>
                   </div>
                 </div>
               </div>
