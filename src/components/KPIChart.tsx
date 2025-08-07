@@ -398,10 +398,3 @@ export function KPIChart({ analyticsData, selectedRole }: KPIChartProps) {
     </div>
   );
 }
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
