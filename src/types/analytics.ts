@@ -45,4 +45,17 @@ export interface AnalyticsData {
   recentActivity: PageView[];
   users: UserAnalytics[];
   topPerformers: UserAnalytics[];
+  aiRecommendations: AIRecommendation[];
+}
+
+export interface AIRecommendation {
+  id: string;
+  dashboardId: string;
+  dashboardName: string;
+  priority: 'high' | 'medium' | 'low';
+  recommendation: string;
+  reasoning: string;
+  kpiImpact: string;
+  suggestedActions: string[];
+  confidence: number; // 0-100
 }

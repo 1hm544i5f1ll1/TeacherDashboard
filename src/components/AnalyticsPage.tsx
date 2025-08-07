@@ -1,10 +1,12 @@
 import React from 'react';
 import { 
   BarChart3, Users, Clock, MousePointer, TrendingUp, 
-  ArrowLeft, Eye, Calendar, Activity, User, Award, Target
+  ArrowLeft, Eye, Calendar, Activity, User, Award, Target,
+  Brain, AlertTriangle, CheckCircle, Info, ArrowUp, ArrowDown,
+  Filter, Search, Table
 } from 'lucide-react';
 import { getAnalyticsData } from '../data/analyticsData';
-import { DashboardAnalytics, UserAnalytics } from '../types/analytics';
+import { DashboardAnalytics, UserAnalytics, AIRecommendation } from '../types/analytics';
 
 interface AnalyticsPageProps {
   onBack: () => void;
@@ -12,7 +14,10 @@ interface AnalyticsPageProps {
 
 export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const analyticsData = getAnalyticsData();
-  const [selectedView, setSelectedView] = React.useState<'overview' | 'users' | 'dashboards'>('overview');
+  const [selectedView, setSelectedView] = React.useState<'overview' | 'users' | 'dashboards' | 'ai-insights'>('overview');
+  const [sortBy, setSortBy] = React.useState<'engagement' | 'pageViews' | 'timeOnPage' | 'users'>('engagement');
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -40,6 +45,68 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
     if (score >= 60) return 'bg-yellow-500 text-white';
     if (score >= 40) return 'bg-orange-500 text-white';
     return 'bg-red-500 text-white';
+  };
+
+  const getPriorityColor = (priority: string): string => {
+    switch (priority) {
+      case 'high': return 'text-red-600 bg-red-50 border-red-200';
+      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'low': return 'text-green-600 bg-green-50 border-green-200';
+      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high': return <AlertTriangle className="h-4 w-4" />;
+      case 'medium': return <Info className="h-4 w-4" />;
+      case 'low': return <CheckCircle className="h-4 w-4" />;
+      default: return <Info className="h-4 w-4" />;
+    }
+  };
+
+  // Sort and filter users
+  const sortedUsers = React.useMemo(() => {
+    let filtered = analyticsData.users.filter(user =>
+      user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.mostVisitedDashboard.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return filtered.sort((a, b) => {
+      let aValue, bValue;
+      switch (sortBy) {
+        case 'engagement':
+          aValue = a.engagementScore;
+          bValue = b.engagementScore;
+          break;
+        case 'pageViews':
+          aValue = a.totalPageViews;
+          bValue = b.totalPageViews;
+          break;
+        case 'timeOnPage':
+          aValue = a.averageTimeOnPage;
+          bValue = b.averageTimeOnPage;
+          break;
+        case 'users':
+          aValue = a.dashboardsVisited.length;
+          bValue = b.dashboardsVisited.length;
+          break;
+        default:
+          aValue = a.engagementScore;
+          bValue = b.engagementScore;
+      }
+      
+      return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+    });
+  }, [analyticsData.users, searchTerm, sortBy, sortOrder]);
+
+  const handleSort = (column: typeof sortBy) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc');
+    }
   };
 
   const MetricCard = ({ 
@@ -245,12 +312,23 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 >
                   Dashboards
                 </button>
+                <button
+                  onClick={() => setSelectedView('ai-insights')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium smooth-transition ${
+                    selectedView === 'ai-insights' 
+                      ? 'bg-green-500 text-white' 
+                      : 'text-green-600 hover:bg-green-50'
+                  }`}
+                >
+                  AI Insights
+                </button>
               </div>
               <div className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                 Last 30 Days
               </div>
             </div>
           </div>
+          )}
         </div>
       </header>
 
@@ -307,16 +385,135 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold nature-heading flex items-center">
-                  <Users className="h-6 w-6 mr-3 text-green-600" />
-                  Individual User Analytics
+                  <Table className="h-6 w-6 mr-3 text-green-600" />
+                  User Analytics Table
                 </h2>
-                <div className="text-sm nature-subtext">Dynamically sorted by engagement score</div>
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
+                    />
+                  </div>
+                  <div className="text-sm nature-subtext">
+                    {sortedUsers.length} users • Sorted by {sortBy} ({sortOrder})
+                  </div>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {analyticsData.users.map((user) => (
-                  <UserAnalyticsCard key={user.userId} user={user} />
-                ))}
+              {/* User Analytics Table */}
+              <div className="nature-card bg-white/95 overflow-hidden organic-shape">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-green-50/50 border-b border-green-100">
+                      <tr>
+                        <th className="text-left p-4 font-semibold nature-heading">User</th>
+                        <th 
+                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
+                          onClick={() => handleSort('engagement')}
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Engagement</span>
+                            {sortBy === 'engagement' && (
+                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
+                          onClick={() => handleSort('pageViews')}
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Page Views</span>
+                            {sortBy === 'pageViews' && (
+                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
+                          onClick={() => handleSort('timeOnPage')}
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Avg. Time</span>
+                            {sortBy === 'timeOnPage' && (
+                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
+                            )}
+                          </div>
+                        </th>
+                        <th className="text-left p-4 font-semibold nature-heading">Clicks</th>
+                        <th 
+                          className="text-left p-4 font-semibold nature-heading cursor-pointer hover:bg-green-100/50 transition-colors"
+                          onClick={() => handleSort('users')}
+                        >
+                          <div className="flex items-center space-x-1">
+                            <span>Dashboards</span>
+                            {sortBy === 'users' && (
+                              sortOrder === 'desc' ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />
+                            )}
+                          </div>
+                        </th>
+                        <th className="text-left p-4 font-semibold nature-heading">Most Used</th>
+                        <th className="text-left p-4 font-semibold nature-heading">Last Activity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedUsers.map((user, index) => (
+                        <tr 
+                          key={user.userId} 
+                          className={`border-b border-green-50 hover:bg-green-50/30 transition-colors ${
+                            index % 2 === 0 ? 'bg-white' : 'bg-green-25/20'
+                          }`}
+                        >
+                          <td className="p-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold text-sm">{user.userName.charAt(0)}</span>
+                              </div>
+                              <div>
+                                <div className="font-semibold nature-heading">{user.userName}</div>
+                                <div className="text-sm nature-subtext">User #{index + 1}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center space-x-2">
+                              <div className={`px-3 py-1 rounded-full text-sm font-medium ${getEngagementBadge(user.engagementScore)}`}>
+                                {user.engagementScore.toFixed(1)}%
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-semibold nature-heading">{user.totalPageViews}</div>
+                            <div className="text-sm nature-subtext">visits</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-semibold nature-heading">{formatTime(Math.round(user.averageTimeOnPage))}</div>
+                            <div className="text-sm nature-subtext">per session</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-semibold nature-heading">{user.averageClicksPerSession.toFixed(1)}</div>
+                            <div className="text-sm nature-subtext">per session</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-semibold nature-heading">{user.dashboardsVisited.length}</div>
+                            <div className="text-sm nature-subtext">explored</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-medium nature-heading text-sm">{user.mostVisitedDashboard}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="text-sm nature-subtext">{formatDate(user.lastActivity)}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -339,8 +536,76 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             </div>
           )}
 
+          {selectedView === 'ai-insights' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold nature-heading flex items-center">
+                  <Brain className="h-6 w-6 mr-3 text-green-600" />
+                  AI-Powered Dashboard Insights
+                </h2>
+                <div className="text-sm nature-subtext">Intelligent recommendations based on KPI analysis</div>
+              </div>
+              
+              {/* AI Recommendations */}
+              <div className="space-y-4">
+                {analyticsData.aiRecommendations.map((rec) => (
+                  <div key={rec.id} className="nature-card bg-white/95 p-6 organic-shape">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-lg border ${getPriorityColor(rec.priority)}`}>
+                          {getPriorityIcon(rec.priority)}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold nature-heading">{rec.dashboardName}</h3>
+                          <div className="flex items-center space-x-3 mt-1">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(rec.priority)}`}>
+                              {rec.priority.toUpperCase()} PRIORITY
+                            </span>
+                            <span className="text-sm nature-subtext">
+                              AI Confidence: {rec.confidence}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50/50 rounded-xl border-l-4 border-blue-400">
+                        <h4 className="font-semibold text-blue-800 mb-2">🤖 AI Recommendation</h4>
+                        <p className="text-blue-700">{rec.recommendation}</p>
+                      </div>
+                      
+                      <div className="p-4 bg-purple-50/50 rounded-xl border-l-4 border-purple-400">
+                        <h4 className="font-semibold text-purple-800 mb-2">📊 Data Analysis</h4>
+                        <p className="text-purple-700">{rec.reasoning}</p>
+                      </div>
+                      
+                      <div className="p-4 bg-orange-50/50 rounded-xl border-l-4 border-orange-400">
+                        <h4 className="font-semibold text-orange-800 mb-2">🎯 KPI Impact</h4>
+                        <p className="text-orange-700">{rec.kpiImpact}</p>
+                      </div>
+                      
+                      <div className="p-4 bg-green-50/50 rounded-xl border-l-4 border-green-400">
+                        <h4 className="font-semibold text-green-800 mb-2">✅ Suggested Actions</h4>
+                        <ul className="text-green-700 space-y-1">
+                          {rec.suggestedActions.map((action, index) => (
+                            <li key={index} className="flex items-start space-x-2">
+                              <span className="text-green-500 mt-1">•</span>
+                              <span>{action}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Recent Activity Feed */}
-          <div className="nature-card bg-white/95 p-8 organic-shape">
+          {selectedView === 'overview' && (
+            <div className="nature-card bg-white/95 p-8 organic-shape">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold nature-heading flex items-center">
                 <Activity className="h-6 w-6 mr-3 text-green-600" />

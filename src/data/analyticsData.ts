@@ -1,5 +1,95 @@
 import { AnalyticsData, PageView, DashboardAnalytics, UserAnalytics } from '../types/analytics';
 
+// Simulate AI recommendations based on KPIs
+function generateAIRecommendations(dashboards: DashboardAnalytics[]): any[] {
+  const recommendations = [];
+  
+  // Sort dashboards by different KPIs for AI analysis
+  const sortedByEngagement = [...dashboards].sort((a, b) => b.engagementScore - a.engagementScore);
+  const sortedByPageViews = [...dashboards].sort((a, b) => b.pageViews - a.pageViews);
+  const sortedByTimeOnPage = [...dashboards].sort((a, b) => b.averageTimeOnPage - a.averageTimeOnPage);
+  
+  dashboards.forEach((dashboard, index) => {
+    let priority: 'high' | 'medium' | 'low' = 'medium';
+    let recommendation = '';
+    let reasoning = '';
+    let kpiImpact = '';
+    let suggestedActions: string[] = [];
+    let confidence = 75;
+    
+    // AI Logic: Analyze performance patterns
+    if (dashboard.engagementScore < 40) {
+      priority = 'high';
+      recommendation = 'Critical: Redesign dashboard content and improve user experience';
+      reasoning = `Low engagement score (${dashboard.engagementScore.toFixed(1)}%) indicates users are not finding value. Average time on page is ${Math.round(dashboard.averageTimeOnPage)}s which is below optimal.`;
+      kpiImpact = 'High impact on user retention and platform adoption';
+      suggestedActions = [
+        'Conduct user interviews to identify pain points',
+        'Redesign dashboard layout for better usability',
+        'Add interactive tutorials or onboarding',
+        'Implement gamification elements'
+      ];
+      confidence = 85;
+    } else if (dashboard.engagementScore > 70) {
+      priority = 'low';
+      recommendation = 'Optimize: Leverage high performance to boost other dashboards';
+      reasoning = `Excellent engagement score (${dashboard.engagementScore.toFixed(1)}%) with ${dashboard.pageViews} page views. Users spend an average of ${Math.round(dashboard.averageTimeOnPage)}s engaged.`;
+      kpiImpact = 'Use as template for improving underperforming dashboards';
+      suggestedActions = [
+        'Document successful design patterns',
+        'A/B test features with other dashboards',
+        'Create user success stories',
+        'Expand similar functionality'
+      ];
+      confidence = 90;
+    } else if (dashboard.averageTimeOnPage < 120) {
+      priority = 'medium';
+      recommendation = 'Improve: Increase content engagement and time on page';
+      reasoning = `Moderate engagement (${dashboard.engagementScore.toFixed(1)}%) but low time on page (${Math.round(dashboard.averageTimeOnPage)}s). Users visit but don't stay long.`;
+      kpiImpact = 'Medium impact on user satisfaction and feature adoption';
+      suggestedActions = [
+        'Add more interactive content',
+        'Implement progress tracking',
+        'Create guided workflows',
+        'Add contextual help and tips'
+      ];
+      confidence = 80;
+    } else {
+      recommendation = 'Monitor: Maintain current performance levels';
+      reasoning = `Balanced performance with ${dashboard.engagementScore.toFixed(1)}% engagement. ${dashboard.uniqueUsers} unique users are actively using this dashboard.`;
+      kpiImpact = 'Stable performance contributing to overall platform health';
+      suggestedActions = [
+        'Continue monitoring key metrics',
+        'Gather user feedback regularly',
+        'Make incremental improvements',
+        'Test new features carefully'
+      ];
+      confidence = 75;
+    }
+    
+    recommendations.push({
+      id: `rec_${dashboard.dashboardId}`,
+      dashboardId: dashboard.dashboardId,
+      dashboardName: dashboard.dashboardName,
+      priority,
+      recommendation,
+      reasoning,
+      kpiImpact,
+      suggestedActions,
+      confidence
+    });
+  });
+  
+  // Sort recommendations by priority (high -> medium -> low) then by confidence
+  return recommendations.sort((a, b) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
+    return b.confidence - a.confidence;
+  });
+}
+
 // Generate mock analytics data
 function generateMockPageViews(): PageView[] {
   const dashboards = [
@@ -163,6 +253,7 @@ export function getAnalyticsData(): AnalyticsData {
     dashboards,
     recentActivity: pageViews.slice(0, 20),
     users,
-    topPerformers: users.slice(0, 10)
+    topPerformers: users.slice(0, 10),
+    aiRecommendations: generateAIRecommendations(dashboards)
   };
 }
