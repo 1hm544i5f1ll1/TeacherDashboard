@@ -37,6 +37,8 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const analyticsData = getAnalyticsData();
   const [selectedRole, setSelectedRole] = React.useState<string>('all');
   const [showRoleDropdown, setShowRoleDropdown] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<string>('all');
+  const [showUserDropdown, setShowUserDropdown] = React.useState(false);
   const [userBehaviorData, setUserBehaviorData] = React.useState<any>(getSimulatedUserBehaviorData());
   const [insights, setInsights] = React.useState<any>(getSimulatedInsights());
   const [isLoading, setIsLoading] = React.useState(false);
@@ -72,11 +74,11 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   }, [selectedRole]);
 
   // Load user behavior analysis
-  const loadUserBehaviorAnalysis = async () => {
+  const loadUserBehaviorAnalysis = async (userId = null) => {
     setIsLoading(true);
     try {
-      const behaviorData = await dbService.analyzeUserBehavior(null, '30d');
-      const insightsData = await dbService.generateInsights();
+      const behaviorData = await dbService.analyzeUserBehavior(userId, '30d');
+      const insightsData = await dbService.generateInsights(userId);
       
       setUserBehaviorData(behaviorData);
       setInsights(insightsData);
@@ -84,6 +86,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
       // Track analysis request
       userTracker.trackDashboardEvent('behavior_analysis_requested', {
         timeRange: '30d',
+        userId: userId || 'all',
         dataPoints: behaviorData?.totalInteractions || 0
       });
       
@@ -104,6 +107,21 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
       newRole: roleId,
       previousRole: selectedRole
     });
+  };
+
+  // Handle user selection change
+  const handleUserChange = (userId: string) => {
+    setSelectedUser(userId);
+    setShowUserDropdown(false);
+    
+    // Track user selection
+    userTracker.trackDashboardEvent('analytics_user_changed', {
+      newUser: userId,
+      previousUser: selectedUser
+    });
+    
+    // Automatically reload analysis for selected user
+    loadUserBehaviorAnalysis(userId === 'all' ? null : userId);
   };
 
   const formatTime = (seconds: number): string => {
@@ -152,6 +170,21 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   ];
 
   const selectedRoleData = roles.find(role => role.id === selectedRole) || roles[0];
+
+  // Database users (simulated)
+  const databaseUsers = [
+    { id: 'all', name: 'All Users', role: 'All Roles', icon: '👥', interactions: 2847 },
+    { id: 'user_001', name: 'Sarah Mitchell', role: 'Teacher', icon: '👩‍🏫', interactions: 456 },
+    { id: 'user_002', name: 'David Chen', role: 'CEO', icon: '👔', interactions: 234 },
+    { id: 'user_003', name: 'Emma Rodriguez', role: 'IT Specialist', icon: '💻', interactions: 198 },
+    { id: 'user_004', name: 'Michael Johnson', role: 'Teacher', icon: '👩‍🏫', interactions: 387 },
+    { id: 'user_005', name: 'Lisa Thompson', role: 'Team Leader', icon: '👨‍💼', interactions: 145 },
+    { id: 'user_006', name: 'James Wilson', role: 'Teacher', icon: '👩‍🏫', interactions: 298 },
+    { id: 'user_007', name: 'Maria Garcia', role: 'CEO', icon: '👔', interactions: 167 },
+    { id: 'user_008', name: 'Robert Davis', role: 'IT Specialist', icon: '💻', interactions: 189 }
+  ];
+
+  const selectedUserData = databaseUsers.find(user => user.id === selectedUser) || databaseUsers[0];
 
   // Simulated user behavior data
   function getSimulatedUserBehaviorData() {
@@ -348,7 +381,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
           
           <div className="flex items-center space-x-4">
             <button
-              onClick={loadUserBehaviorAnalysis}
+              onClick={() => loadUserBehaviorAnalysis(selectedUser === 'all' ? null : selectedUser)}
               disabled={isLoading}
               className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 smooth-transition disabled:opacity-50 font-medium"
             >
@@ -357,6 +390,50 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 {isLoading ? 'Analyzing Interactions...' : 'Start Interaction Analysis'}
               </span>
             </button>
+            
+            {/* Database User Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserDropdown(!showUserDropdown)}
+                className="flex items-center space-x-2 px-4 py-3 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 smooth-transition border border-blue-200"
+              >
+                <span>{selectedUserData.icon}</span>
+                <div className="text-left">
+                  <div className="font-medium text-sm">{selectedUserData.name}</div>
+                  <div className="text-xs text-blue-600">{selectedUserData.interactions.toLocaleString()} interactions</div>
+                </div>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+              
+              {showUserDropdown && (
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-blue-100 z-20 max-h-80 overflow-y-auto">
+                  {databaseUsers.map((user) => (
+                    <button
+                      key={user.id}
+                      onClick={() => handleUserChange(user.id)}
+                      className={`w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center space-x-3 border-b border-blue-50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl ${
+                        selectedUser === user.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
+                      }`}
+                    >
+                      <span className="text-lg">{user.icon}</span>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-800">{user.name}</div>
+                        <div className="text-sm text-gray-600">{user.role}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-blue-700">
+                          {user.interactions.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-blue-600">interactions</div>
+                      </div>
+                      {selectedUser === user.id && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -410,8 +487,15 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
               <h2 className="text-2xl font-bold nature-heading flex items-center">
                 <Activity className="h-6 w-6 mr-3 text-purple-600" />
                 Interaction Analysis Results
+                {selectedUser !== 'all' && (
+                  <span className="ml-3 text-lg text-blue-600">
+                    - {selectedUserData.name}
+                  </span>
+                )}
               </h2>
-              <div className="text-sm nature-subtext">Real user interaction data • AI-powered insights</div>
+              <div className="text-sm nature-subtext">
+                {selectedUser === 'all' ? 'All users' : `${selectedUserData.name} (${selectedUserData.role})`} • AI-powered insights
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
