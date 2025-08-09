@@ -406,7 +406,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
               </button>
               
               {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-blue-100 z-20 max-h-80 overflow-y-auto">
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-blue-100 z-50 max-h-80 overflow-y-auto">
                   {databaseUsers.map((user) => (
                     <button
                       key={user.id}
