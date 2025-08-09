@@ -37,8 +37,8 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   const analyticsData = getAnalyticsData();
   const [selectedRole, setSelectedRole] = React.useState<string>('all');
   const [showRoleDropdown, setShowRoleDropdown] = React.useState(false);
-  const [userBehaviorData, setUserBehaviorData] = React.useState<any>(null);
-  const [insights, setInsights] = React.useState<any>(null);
+  const [userBehaviorData, setUserBehaviorData] = React.useState<any>(getSimulatedUserBehaviorData());
+  const [insights, setInsights] = React.useState<any>(getSimulatedInsights());
   const [isLoading, setIsLoading] = React.useState(false);
 
   // Initialize user interaction tracking
@@ -152,6 +152,135 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
   ];
 
   const selectedRoleData = roles.find(role => role.id === selectedRole) || roles[0];
+
+  // Simulated user behavior data
+  function getSimulatedUserBehaviorData() {
+    return {
+      totalInteractions: 2847,
+      uniqueUsers: 23,
+      uniqueSessions: 156,
+      interactionTypes: {
+        click: 1245,
+        scroll: 892,
+        form_interaction: 234,
+        page_view: 476
+      },
+      userRoles: {
+        teacher: 1156,
+        ceo: 623,
+        itSpecialist: 534,
+        teamLeader: 534
+      },
+      engagementMetrics: {
+        averageEngagement: 73.2,
+        bounceRate: 28.5,
+        totalSessions: 156
+      },
+      userNeeds: {
+        quick_access: {
+          confidence: 0.78,
+          count: 18,
+          percentage: 78.3
+        },
+        exploration_oriented: {
+          confidence: 0.65,
+          count: 15,
+          percentage: 65.2
+        },
+        comprehensive_user: {
+          confidence: 0.82,
+          count: 19,
+          percentage: 82.6
+        }
+      },
+      timeDistribution: {
+        hourly: [12, 8, 5, 3, 2, 4, 15, 45, 78, 92, 105, 134, 156, 142, 128, 98, 76, 54, 43, 32, 28, 22, 18, 15],
+        daily: {
+          'Mon Dec 16 2024': 234,
+          'Tue Dec 17 2024': 198,
+          'Wed Dec 18 2024': 267,
+          'Thu Dec 19 2024': 189,
+          'Fri Dec 20 2024': 156
+        }
+      },
+      popularPages: {
+        '/dashboard/teacher': 456,
+        '/dashboard/ceo': 234,
+        '/dashboard/it-specialist': 198,
+        '/analytics': 167,
+        '/dashboard/team-leader': 145
+      }
+    };
+  }
+
+  // Simulated AI insights
+  function getSimulatedInsights() {
+    return {
+      summary: {
+        totalUsers: 23,
+        totalSessions: 156,
+        avgInteractionsPerSession: 18.3,
+        engagementScore: 73.2
+      },
+      keyFindings: [
+        {
+          type: 'positive',
+          finding: 'High user engagement detected',
+          detail: 'Average engagement score of 73.2% indicates users find the platform valuable and are actively using multiple features'
+        },
+        {
+          type: 'insight',
+          finding: 'Strong exploration behavior identified',
+          detail: '82.6% of users show comprehensive usage patterns, indicating they are discovering and utilizing various dashboard features'
+        },
+        {
+          type: 'concern',
+          finding: 'Quick access pattern prevalent',
+          detail: '78.3% of users exhibit quick access behavior, suggesting need for streamlined workflows and faster navigation'
+        }
+      ],
+      recommendations: [
+        {
+          priority: 'high',
+          category: 'ux',
+          recommendation: 'Implement quick action shortcuts for frequent tasks',
+          detail: 'Based on 78.3% of users showing quick access patterns, add keyboard shortcuts and quick action buttons for most-used features',
+          expectedImpact: 'Reduce task completion time by 25-30% and improve user satisfaction'
+        },
+        {
+          priority: 'medium',
+          category: 'content',
+          recommendation: 'Create guided feature discovery tours',
+          detail: 'With 82.6% comprehensive users, implement interactive tutorials to help users discover advanced features more efficiently',
+          expectedImpact: 'Increase feature adoption by 15-20% and reduce learning curve'
+        },
+        {
+          priority: 'medium',
+          category: 'performance',
+          recommendation: 'Optimize teacher dashboard loading speed',
+          detail: 'Teacher dashboard receives 456 visits (highest traffic), focus optimization efforts here for maximum impact',
+          expectedImpact: 'Improve overall platform performance and user experience for majority of users'
+        }
+      ],
+      userSegments: {
+        power_users: {
+          criteria: 'High interaction count and long session duration',
+          percentage: 22,
+          characteristics: ['Explores multiple features', 'Long session times', 'High engagement']
+        },
+        task_focused_users: {
+          criteria: 'Moderate interaction with specific goals',
+          percentage: 56,
+          characteristics: ['Direct navigation', 'Feature-specific usage', 'Efficient workflows']
+        },
+        quick_access_users: {
+          criteria: 'Fast visits for specific information',
+          percentage: 22,
+          characteristics: ['Short sessions', 'Targeted actions', 'Minimal exploration']
+        }
+      }
+    };
+  }
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
