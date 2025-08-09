@@ -5,7 +5,7 @@
 
 class DatabaseService {
   constructor() {
-    this.dbUrl = process.env.DATABASE_URL || 'sqlite://./user_interactions.db';
+    this.dbUrl = import.meta.env.VITE_DATABASE_URL || 'sqlite://./user_interactions.db';
     this.isConnected = false;
   }
 
