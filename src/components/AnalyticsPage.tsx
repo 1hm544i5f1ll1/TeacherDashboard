@@ -207,48 +207,25 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             </button>
             <div>
               <h1 className="text-3xl font-bold nature-heading flex items-center">
-                <BarChart3 className="h-8 w-8 mr-3 text-green-600" />
-                User Interaction Analytics
-              </h1>
-              <p className="nature-subtext mt-1">AI-powered analysis of user behavior and system interactions</p>
-            </div>
+            <h1 className="text-2xl font-bold nature-heading flex items-center">
+              <Brain className="h-7 w-7 mr-3 text-purple-600" />
+              User Interaction Tracking & Analysis System
+            </h1>
+            <p className="nature-subtext mt-2 text-base">
+              JavaScript module that gathers user interactions with the system, records them into database, 
+              and analyzes patterns to understand user needs and behavior
+            </p>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 smooth-transition"
-              >
-                <span>{selectedRoleData.icon}</span>
-                <span className="font-medium">{selectedRoleData.name}</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              
-              {showRoleDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-green-100 z-10">
-                  {roles.map((role) => (
-                    <button
-                      key={role.id}
-                      onClick={() => handleRoleChange(role.id)}
-                      className="w-full text-left px-4 py-3 hover:bg-green-50 flex items-center space-x-2 first:rounded-t-xl last:rounded-b-xl"
-                    >
-                      <span>{role.icon}</span>
-                      <span>{role.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            
             <button
               onClick={loadUserBehaviorAnalysis}
               disabled={isLoading}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 smooth-transition disabled:opacity-50"
+              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 smooth-transition disabled:opacity-50 font-medium"
             >
-              <Brain className="h-4 w-4" />
+              <Activity className="h-5 w-5" />
               <span className="font-medium">
-                {isLoading ? 'Analyzing...' : 'Analyze User Behavior'}
+                {isLoading ? 'Analyzing Interactions...' : 'Start Interaction Analysis'}
               </span>
             </button>
           </div>
@@ -256,47 +233,85 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
       </header>
 
       <main className="space-y-8">
-        {/* KPI Chart - Always Visible */}
-        <KPIChart analyticsData={analyticsData} selectedRole={selectedRole} />
+        {/* System Overview */}
+        <div className="nature-card bg-white/95 p-8 organic-shape">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Brain className="h-10 w-10 text-purple-600" />
+            </div>
+            <h2 className="text-2xl font-bold nature-heading mb-3">
+              JavaScript User Interaction Tracking Module
+            </h2>
+            <p className="text-lg nature-subtext max-w-3xl mx-auto leading-relaxed">
+              This system automatically captures every user interaction with the dashboard - clicks, scrolls, 
+              time spent on pages, form inputs, and navigation patterns. All data is stored in a database 
+              and analyzed using AI algorithms to understand user behavior and identify their specific needs.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-6 bg-blue-50/50 rounded-xl border border-blue-200">
+              <MousePointer className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-blue-800 mb-2">Data Collection</h3>
+              <p className="text-sm text-blue-700">
+                Tracks clicks, scrolls, time-on-page, form interactions, and user journeys in real-time
+              </p>
+            </div>
+            <div className="text-center p-6 bg-green-50/50 rounded-xl border border-green-200">
+              <BarChart3 className="h-8 w-8 text-green-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-green-800 mb-2">Database Storage</h3>
+              <p className="text-sm text-green-700">
+                Stores interaction data in structured SQL database with user sessions and analytics tables
+              </p>
+            </div>
+            <div className="text-center p-6 bg-purple-50/50 rounded-xl border border-purple-200">
+              <Brain className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+              <h3 className="font-semibold text-purple-800 mb-2">AI Analysis</h3>
+              <p className="text-sm text-purple-700">
+                Analyzes patterns to identify user needs, preferences, and optimization opportunities
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* User Behavior Analysis Results */}
         {userBehaviorData && (
           <div className="nature-card bg-white/95 p-8 organic-shape">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold nature-heading flex items-center">
-                <Brain className="h-6 w-6 mr-3 text-purple-600" />
-                User Behavior Analysis
+                <Activity className="h-6 w-6 mr-3 text-purple-600" />
+                Interaction Analysis Results
               </h2>
-              <div className="text-sm nature-subtext">Last 30 days • AI-powered insights</div>
+              <div className="text-sm nature-subtext">Real user interaction data • AI-powered insights</div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <MetricCard
-                icon={<Users className="h-6 w-6 text-blue-600" />}
-                title="Total Users"
+                icon={<User className="h-6 w-6 text-blue-600" />}
+                title="Tracked Users"
                 value={userBehaviorData.uniqueUsers}
-                subtitle="Unique users tracked"
+                subtitle="Users with recorded interactions"
                 color="blue"
               />
               <MetricCard
-                icon={<Activity className="h-6 w-6 text-green-600" />}
-                title="Total Interactions"
+                icon={<MousePointer className="h-6 w-6 text-green-600" />}
+                title="Interactions Captured"
                 value={userBehaviorData.totalInteractions.toLocaleString()}
-                subtitle="User interactions recorded"
+                subtitle="Total interactions in database"
                 color="green"
               />
               <MetricCard
-                icon={<Clock className="h-6 w-6 text-purple-600" />}
-                title="Avg Session Duration"
+                icon={<BarChart3 className="h-6 w-6 text-purple-600" />}
+                title="Engagement Score"
                 value={`${Math.round(userBehaviorData.engagementMetrics?.averageEngagement || 0)}%`}
-                subtitle="Average engagement score"
+                subtitle="AI-calculated user engagement"
                 color="purple"
               />
               <MetricCard
-                icon={<TrendingUp className="h-6 w-6 text-orange-600" />}
-                title="Active Sessions"
+                icon={<Activity className="h-6 w-6 text-orange-600" />}
+                title="Sessions Analyzed"
                 value={userBehaviorData.uniqueSessions}
-                subtitle="Total user sessions"
+                subtitle="User sessions in database"
                 color="orange"
               />
             </div>
@@ -304,20 +319,23 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             {/* User Needs Analysis */}
             {userBehaviorData.userNeeds && Object.keys(userBehaviorData.userNeeds).length > 0 && (
               <div className="border-t border-green-100 pt-6">
-                <h3 className="text-xl font-bold nature-heading mb-4">🎯 Identified User Needs</h3>
+                <h3 className="text-xl font-bold nature-heading mb-4">🎯 AI-Identified User Needs</h3>
+                <p className="text-sm nature-subtext mb-4">
+                  Based on interaction patterns, the system has identified these user behavior types:
+                </p>
                 <div className="space-y-3">
                   {Object.entries(userBehaviorData.userNeeds).map(([need, data]: [string, any]) => (
                     <div key={need} className="p-4 bg-blue-50/50 rounded-xl border-l-4 border-blue-400">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-semibold text-blue-800 capitalize">
-                          {need.replace('_', ' ')} Users
+                          {need.replace('_', ' ')} Pattern Detected
                         </h4>
                         <span className="text-sm text-blue-600">
-                          {data.confidence * 100}% confidence
+                          AI Confidence: {(data.confidence * 100).toFixed(0)}%
                         </span>
                       </div>
                       <p className="text-blue-700 text-sm">
-                        {data.count} users ({data.percentage.toFixed(1)}%) show this pattern
+                        {data.count} users ({data.percentage.toFixed(1)}%) exhibit this interaction behavior
                       </p>
                     </div>
                   ))}
@@ -332,16 +350,16 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
           <div className="nature-card bg-white/95 p-8 organic-shape">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold nature-heading flex items-center">
-                <Brain className="h-6 w-6 mr-3 text-green-600" />
-                AI-Generated Insights & Recommendations
+                <Brain className="h-6 w-6 mr-3 text-purple-600" />
+                AI Analysis Conclusions & Recommendations
               </h2>
-              <div className="text-sm nature-subtext">Based on user interaction patterns</div>
+              <div className="text-sm nature-subtext">Conclusions drawn from interaction data analysis</div>
             </div>
 
             {/* Key Findings */}
             {insights.keyFindings && insights.keyFindings.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-bold nature-heading mb-4">🔍 Key Findings</h3>
+                <h3 className="text-lg font-bold nature-heading mb-4">🔍 Key Findings from Data Analysis</h3>
                 <div className="space-y-3">
                   {insights.keyFindings.map((finding: any, index: number) => (
                     <div key={index} className={`p-4 rounded-xl border-l-4 ${
@@ -372,7 +390,10 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             {/* Recommendations */}
             {insights.recommendations && insights.recommendations.length > 0 && (
               <div className="border-t border-green-100 pt-6">
-                <h3 className="text-lg font-bold nature-heading mb-4">💡 AI Recommendations</h3>
+                <h3 className="text-lg font-bold nature-heading mb-4">💡 System Recommendations</h3>
+                <p className="text-sm nature-subtext mb-4">
+                  Based on the interaction analysis, here are AI-generated recommendations to better serve user needs:
+                </p>
                 <div className="space-y-4">
                   {insights.recommendations.map((rec: any, index: number) => (
                     <div key={index} className="p-6 bg-purple-50/50 rounded-xl border border-purple-200">
@@ -407,8 +428,8 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
         <div className="nature-card bg-white/95 p-8 organic-shape">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold nature-heading flex items-center">
-              <Activity className="h-6 w-6 mr-3 text-green-600" />
-              Current Session Analytics
+              <Activity className="h-6 w-6 mr-3 text-blue-600" />
+              Live Interaction Tracking
             </h2>
             <button
               onClick={() => {
@@ -416,26 +437,30 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 console.log('Current Session:', sessionAnalytics);
                 alert(`Session ID: ${sessionAnalytics.sessionId}\nDuration: ${Math.round(sessionAnalytics.sessionDuration / 1000)}s\nInteractions: ${sessionAnalytics.totalInteractions}`);
               }}
-              className="text-sm px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 smooth-transition"
+              className="text-sm px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 smooth-transition"
             >
-              View Session Details
+              View Current Session Data
             </button>
           </div>
           
+          <p className="text-sm nature-subtext mb-6">
+            The JavaScript module is actively tracking your interactions on this page in real-time:
+          </p>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-green-50/50 rounded-xl">
-              <div className="text-2xl font-bold text-green-700">
+            <div className="text-center p-4 bg-blue-50/50 rounded-xl border border-blue-200">
+              <div className="text-2xl font-bold text-blue-700">
                 {Math.round((Date.now() - Date.now()) / 1000)}s
               </div>
-              <div className="text-sm text-green-600">Session Duration</div>
+              <div className="text-sm text-blue-600">Current Session Time</div>
             </div>
-            <div className="text-center p-4 bg-blue-50/50 rounded-xl">
-              <div className="text-2xl font-bold text-blue-700">Live</div>
-              <div className="text-sm text-blue-600">Tracking Status</div>
+            <div className="text-center p-4 bg-green-50/50 rounded-xl border border-green-200">
+              <div className="text-2xl font-bold text-green-700">Active</div>
+              <div className="text-sm text-green-600">JS Module Status</div>
             </div>
-            <div className="text-center p-4 bg-purple-50/50 rounded-xl">
+            <div className="text-center p-4 bg-purple-50/50 rounded-xl border border-purple-200">
               <div className="text-2xl font-bold text-purple-700">Analytics</div>
-              <div className="text-sm text-purple-600">Current Page</div>
+              <div className="text-sm text-purple-600">Page Being Tracked</div>
             </div>
           </div>
         </div>
