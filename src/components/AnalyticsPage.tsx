@@ -392,7 +392,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             </button>
             
             {/* Database User Selector */}
-            <div className="relative">
+            <div className="relative z-50">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center space-x-2 px-4 py-3 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 smooth-transition border border-blue-200"
@@ -406,7 +406,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
               </button>
               
               {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-blue-100 z-[100] max-h-80 overflow-y-auto">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-2xl border border-blue-100 z-[9999] max-h-80 overflow-y-auto">
                   {databaseUsers.map((user) => (
                     <button
                       key={user.id}
