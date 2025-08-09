@@ -392,7 +392,7 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
             </button>
             
             {/* Database User Selector */}
-            <div className="relative z-50">
+            <div className="relative">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center space-x-2 px-4 py-3 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 smooth-transition border border-blue-200"
@@ -404,39 +404,45 @@ export function AnalyticsPage({ onBack }: AnalyticsPageProps) {
                 </div>
                 <ChevronDown className="h-4 w-4" />
               </button>
-              
-              {showUserDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-2xl border border-blue-100 z-[9999] max-h-80 overflow-y-auto">
-                  {databaseUsers.map((user) => (
-                    <button
-                      key={user.id}
-                      onClick={() => handleUserChange(user.id)}
-                      className={`w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center space-x-3 border-b border-blue-50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl ${
-                        selectedUser === user.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
-                      }`}
-                    >
-                      <span className="text-lg">{user.icon}</span>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-800">{user.name}</div>
-                        <div className="text-sm text-gray-600">{user.role}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-blue-700">
-                          {user.interactions.toLocaleString()}
-                        </div>
-                        <div className="text-xs text-blue-600">interactions</div>
-                      </div>
-                      {selectedUser === user.id && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* User Dropdown - Positioned outside header */}
+      {showUserDropdown && (
+        <div className="fixed inset-0 z-[9999]" onClick={() => setShowUserDropdown(false)}>
+          <div 
+            className="absolute top-24 right-8 w-72 bg-white rounded-xl shadow-2xl border border-blue-100 max-h-80 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {databaseUsers.map((user) => (
+              <button
+                key={user.id}
+                onClick={() => handleUserChange(user.id)}
+                className={`w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center space-x-3 border-b border-blue-50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl ${
+                  selectedUser === user.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
+                }`}
+              >
+                <span className="text-lg">{user.icon}</span>
+                <div className="flex-1">
+                  <div className="font-medium text-gray-800">{user.name}</div>
+                  <div className="text-sm text-gray-600">{user.role}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-blue-700">
+                    {user.interactions.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-blue-600">interactions</div>
+                </div>
+                {selectedUser === user.id && (
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <main className="space-y-8">
         {/* System Overview */}
